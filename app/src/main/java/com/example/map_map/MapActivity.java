@@ -11,7 +11,11 @@ import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
@@ -37,6 +41,7 @@ import org.osmdroid.views.overlay.gestures.RotationGestureOverlay;
 import org.osmdroid.views.overlay.mylocation.GpsMyLocationProvider;
 import org.osmdroid.views.overlay.mylocation.MyLocationNewOverlay;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,7 +55,7 @@ public class MapActivity extends AppCompatActivity implements MapEventsReceiver 
     private KmlDocument kmlDocument;
     private List<GeoPoint> geoPoints;
     private Polygon polygon;
-    private Button saveButton, resetButton;
+    private ImageView saveButton, resetButton;
 
 
     private MapController mapController;
@@ -66,6 +71,34 @@ public class MapActivity extends AppCompatActivity implements MapEventsReceiver 
         Context ctx = getApplicationContext();
         Configuration.getInstance().load(ctx, PreferenceManager.getDefaultSharedPreferences(ctx));
         setContentView(R.layout.activity_map);
+
+        saveButton = findViewById(R.id.savedbtn);
+        resetButton = findViewById(R.id.resetbtn);
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                kmlDocument.mKmlRoot.addOverlay(polygon,kmlDocument);
+                kmlDocument.mKmlRoot.addOverlay(marker,kmlDocument);
+                long millis = System.currentTimeMillis();
+                File localFile = kmlDocument.getDefaultPathForAndroid("KML_" + millis + ".kml");
+                Log.d("path",localFile.getAbsolutePath());
+                kmlDocument.saveAsKML(localFile);
+                Toast.makeText(getApplicationContext(),"Polygon Saved",Toast.LENGTH_SHORT).show();
+            }
+        });
+        resetButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                geoPoints.clear();
+                polygon.setPoints(geoPoints);
+                mMap.getOverlays().clear();
+                mMap.getOverlays().add(0,mapEventsOverlay);
+                initMap();
+                mMap.invalidate();
+            }
+        });
+
         initMap();
     }
 
@@ -127,6 +160,8 @@ public class MapActivity extends AppCompatActivity implements MapEventsReceiver 
         mMap.setMultiTouchControls(true);
         mMap.setClickable(true);
 
+        kmlDocument = new KmlDocument();
+
         mapController = (MapController) mMap.getController();
         mapController.setZoom(18.0f);
         overlayItemArray = new ArrayList<>();
@@ -148,6 +183,7 @@ public class MapActivity extends AppCompatActivity implements MapEventsReceiver 
         //Add Scale Bar
         ScaleBarOverlay myScaleBarOverlay = new ScaleBarOverlay(mMap);
         myScaleBarOverlay.setAlignRight(true);
+        myScaleBarOverlay.setAlignBottom(true);
         mMap.getOverlays().add(myScaleBarOverlay);
 
         //Add Compass

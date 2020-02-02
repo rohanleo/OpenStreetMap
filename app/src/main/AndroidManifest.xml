@@ -23,6 +23,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".MapActivity"></activity>
+        <activity android:name=".SavedActivity"></activity>
+        <activity android:name=".RenderMapActivity"></activity>
     </application>
 
 </manifest>

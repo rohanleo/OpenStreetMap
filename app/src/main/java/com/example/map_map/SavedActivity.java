@@ -9,7 +9,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import java.io.File;
@@ -22,16 +21,14 @@ public class SavedActivity extends AppCompatActivity {
     private ArrayList<String> arrayList;
     private ArrayList<String> uriArrayList;
 
-
     @Override
-    protected void onCreate(@Nullable Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_saved);
 
         listView = findViewById(R.id.list_view);
         arrayList = new ArrayList<String>();
         uriArrayList = new ArrayList<String>();
-
         adapter = new ArrayAdapter<String>(getApplicationContext(),android.R.layout.simple_list_item_1,arrayList);
 
         String path = Environment.getExternalStorageDirectory() + "/kml";
@@ -49,8 +46,10 @@ public class SavedActivity extends AppCompatActivity {
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent =  new Intent(getApplicationContext(),RenderMapActivity.class);
+                // Send the url of the file to the RenderMap intent
+                Intent intent = new Intent(getApplicationContext(),RenderMapActivity.class);
                 intent.putExtra("kml_file_uri",uriArrayList.get(position));
+                startActivity(intent);
             }
         });
     }
